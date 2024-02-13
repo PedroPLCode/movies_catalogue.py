@@ -27,14 +27,19 @@
    </div>
     <h3 class="my-4">Cast</h3>
    <div class="row">
-       <div class="col-md-3 col-sm-6 mb-4">
-           <a href="#">
-               <figure class="figure">
-                   <img src="https://placehold.it/185x278" class="figure-img img-fluid rounded" alt="actor">
-                   <figcaption class="figure-caption">John Doe</figcaption>
-               </figure>
-           </a>
-       </div>
+        {% for actor in cast %}
+            {% if actor.profile_path %}
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <a href="#">
+                        <figure class="figure d-flex flex-column justify-content-center align-items-center">
+                            <img src="{{ tmdb_image_url(actor.profile_path, "w185") }}" class="figure-img img-fluid rounded" alt="actor">
+                            <figcaption class="figure-caption">{{ actor.character }}</figcaption>
+                            <p>{{ actor.name }}</p>
+                        </figure>
+                    </a>
+                </div>
+            {% endif %}
+        {% endfor %}
    </div>
  </div>
 
