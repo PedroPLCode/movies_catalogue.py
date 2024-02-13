@@ -10,7 +10,7 @@
 
    <div class="row">
      <div class="col-md-8">
-       <img class="img-fluid" src="{{ tmdb_image_url(movie.backdrop_path, "w780") }}">
+       <img class="img-fluid" src="{{ tmdb_image_url(image.file_path, "w780") }}">
      </div>
      <div class="col-md-4">
          <h3>{{ movie.tagline }}</h3>
@@ -27,7 +27,7 @@
    </div>
     <h3 class="my-4">Cast</h3>
    <div class="row">
-        {% for actor in cast %}
+        {% for actor in cast[:8] %}
             {% if actor.profile_path %}
                 <div class="col-md-3 col-sm-6 mb-4">
                     <a href="#">
