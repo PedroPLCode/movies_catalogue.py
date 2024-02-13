@@ -2,13 +2,14 @@ import requests
 import random
 from PERSONAL_API_KEY import PERSONAL_API_KEY
 
+api_headers_settings = {
+    "accept": "application/json",
+    "Authorization": f'Bearer {PERSONAL_API_KEY}'
+}
+    
 def get_popular_movies():
     endpoint = "https://api.themoviedb.org/3/movie/popular"
-    headers = {
-        "accept": "application/json",
-        "Authorization": f'Bearer {PERSONAL_API_KEY}'
-    }
-    response = requests.get(endpoint, headers=headers)
+    response = requests.get(endpoint, headers=api_headers_settings)
     return response.json()
 
 
@@ -26,3 +27,9 @@ def get_poster_url(poster_api_path, size="w342"):
 
 def get_movie_title(movie):
     return str(movie['title'])
+
+
+def get_single_movie(movie_id):
+    endpoint = f"https://api.themoviedb.org/3/movie/{movie_id}"
+    response = requests.get(endpoint, headers=api_headers_settings)
+    return response.json()
