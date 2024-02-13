@@ -7,14 +7,15 @@ headers_settings = {
     "Authorization": f'Bearer {PERSONAL_API_KEY}'
 }
     
-def get_popular_movies():
-    endpoint = "https://api.themoviedb.org/3/movie/popular"
+def get_movies_list(list_type='popluar'):
+    endpoint = f"https://api.themoviedb.org/3/movie/{list_type}"
     response = requests.get(endpoint, headers=headers_settings)
+    response.raise_for_status()
     return response.json()
 
 
-def get_movies(how_many):
-    data = get_popular_movies()
+def get_movies(list_type, how_many):
+    data = get_movies_list(list_type)
     data_results = data["results"]
     random.shuffle(data_results)
     return data_results[:how_many]

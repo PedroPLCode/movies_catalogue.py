@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import random
 import tmdb_client
 
@@ -6,8 +6,9 @@ app = Flask(__name__)
 
 @app.route('/')
 def homepage():
-    movies = tmdb_client.get_movies(how_many=8)
-    return render_template("homepage.html", movies=movies)
+    selected_list = request.args.get('list_type', 'popular')
+    movies = tmdb_client.get_movies(how_many=8, list_type=selected_list)
+    return render_template("homepage.html", movies=movies, current_list=selected_list)
 
 
 @app.route("/movie/<movie_id>")
