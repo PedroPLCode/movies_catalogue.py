@@ -1,4 +1,5 @@
 import requests
+import random
 from PERSONAL_API_KEY import PERSONAL_API_KEY
 
 def get_popular_movies():
@@ -13,7 +14,9 @@ def get_popular_movies():
 
 def get_movies(how_many):
     data = get_popular_movies()
-    return data["results"][:how_many]
+    data_results = data["results"]
+    random.shuffle(data_results)
+    return data_results[:how_many]
 
 
 def get_poster_url(poster_api_path, size="w342"):
