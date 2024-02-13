@@ -12,7 +12,11 @@ def homepage():
     if selected_list not in LIST_TYPES:
         selected_list = "popular"
     movies = tmdb_client.get_movies(how_many=8, list_type=selected_list)
-    return render_template("homepage.html", movies=movies, current_list=selected_list, list_types=LIST_TYPES)
+    return render_template("homepage.html",
+                           movies=movies,
+                           current_list=selected_list,
+                           list_types=LIST_TYPES
+                           )
 
 
 @app.route("/movie/<movie_id>")
@@ -21,7 +25,11 @@ def movie_details(movie_id):
     cast = tmdb_client.get_single_movie_cast(movie_id)
     movie_images = tmdb_client.get_single_movie_images(movie_id)
     random_image = random.choice(movie_images['backdrops'])
-    return render_template("movie_details.html", movie=details, cast=cast, image=random_image)
+    return render_template("movie_details.html",
+                           movie=details,
+                           cast=cast,
+                           image=random_image
+                           )
 
 
 @app.context_processor
