@@ -9,6 +9,11 @@ def homepage():
     return render_template("homepage.html", movies=movies)
 
 
+@app.route("/movie/<movie_id>")
+def movie_details(movie_id):
+    return render_template("movie_details.html", movie_id=movie_id)
+
+
 @app.context_processor
 def utility_processor():
     def tmdb_image_url(path, size):
