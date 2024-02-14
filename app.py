@@ -21,7 +21,7 @@ def homepage():
 
 @app.route("/movie/<movie_id>")
 def movie_details(movie_id):
-    details = tmdb_client.get_single_movie(movie_id)
+    details = tmdb_client.get_single_movie_details(movie_id)
     cast = tmdb_client.get_single_movie_cast(movie_id)
     movie_images = tmdb_client.get_single_movie_images(movie_id)
     random_image = random.choice(movie_images['backdrops'])

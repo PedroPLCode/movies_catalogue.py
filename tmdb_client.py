@@ -30,7 +30,7 @@ def get_single_movie_title(movie):
     return str(movie['title'])
 
 
-def get_single_movie(movie_id):
+def get_single_movie_details(movie_id):
     endpoint = f"https://api.themoviedb.org/3/movie/{movie_id}"
     response = requests.get(endpoint, headers=headers_settings)
     return response.json()
