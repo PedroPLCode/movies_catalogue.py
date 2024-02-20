@@ -14,6 +14,22 @@ def get_movies_by_list_type(list_type='popluar'):
     return response.json()
 
 
+def get_movies_by_search_query(search_query):
+    endpoint = f"https://api.themoviedb.org/3/search/movie?query={search_query}"
+    response = requests.get(endpoint, headers=headers_settings)
+    response.raise_for_status()
+    data = response.json()
+    return data['results']
+
+
+def get_movies_airing_today_by_timezone(timezone):
+    endpoint = f"https://api.themoviedb.org/3/tv/airing_today?timezone={timezone}"
+    response = requests.get(endpoint, headers=headers_settings)
+    response.raise_for_status()
+    data = response.json()
+    return data['results']
+
+
 def prepare_movies_list(list_type, how_many):
     data = get_movies_by_list_type(list_type)
     data_results = data["results"]
