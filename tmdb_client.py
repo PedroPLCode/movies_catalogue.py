@@ -1,32 +1,29 @@
 import requests
 import random
 from PERSONAL_API_KEY import PERSONAL_API_KEY
-
-headers_settings = {
-    "accept": "application/json",
-    "Authorization": f'Bearer {PERSONAL_API_KEY}'
-}
     
-def get_movies_by_list_type(list_type='popluar'):
-    endpoint = f"https://api.themoviedb.org/3/movie/{list_type}"
-    response = requests.get(endpoint, headers=headers_settings)
+def call_tmdb_api(endpoint):
+    full_url = f"https://api.themoviedb.org/3/{endpoint}"
+    headers = {
+        "accept": "application/json",
+        "Authorization": f'Bearer {PERSONAL_API_KEY}'
+    }
+    response = requests.get(full_url, headers=headers)
     response.raise_for_status()
     return response.json()
 
 
+def get_movies_by_list_type(list_type='popluar'):
+    return call_tmdb_api(f"movie/{list_type}")
+
+
 def get_movies_by_search_query(search_query):
-    endpoint = f"https://api.themoviedb.org/3/search/movie?query={search_query}"
-    response = requests.get(endpoint, headers=headers_settings)
-    response.raise_for_status()
-    data = response.json()
+    data = call_tmdb_api(f"search/movie?query={search_query}")
     return data['results']
 
 
 def get_movies_airing_today_by_timezone(timezone):
-    endpoint = f"https://api.themoviedb.org/3/tv/airing_today?timezone={timezone}"
-    response = requests.get(endpoint, headers=headers_settings)
-    response.raise_for_status()
-    data = response.json()
+    data = call_tmdb_api(f"tv/airing_today?timezone={timezone}")
     return data['results']
 
 
@@ -47,18 +44,12 @@ def get_single_movie_title(movie):
 
 
 def get_single_movie_details(movie_id):
-    endpoint = f"https://api.themoviedb.org/3/movie/{movie_id}"
-    response = requests.get(endpoint, headers=headers_settings)
-    return response.json()
+    return call_tmdb_api(f"movie/{movie_id}")
 
 
 def get_single_movie_cast(movie_id):
-    endpoint = f"https://api.themoviedb.org/3/movie/{movie_id}/credits"
-    response = requests.get(endpoint, headers=headers_settings)
-    return response.json()["cast"]
+    return call_tmdb_api(f"movie/{movie_id}/credits")["cast"]
 
 
 def get_single_movie_images(movie_id):
-    endpoint = f"https://api.themoviedb.org/3/movie/{movie_id}/images"
-    response = requests.get(endpoint, headers=headers_settings)
-    return response.json()
+    return call_tmdb_api(f"movie/{movie_id}/images")
