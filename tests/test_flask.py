@@ -5,6 +5,7 @@ import pytest
 @pytest.mark.parametrize('path, arg', (
     ('/', 'movie/popular'),
     ('/?list_type=WRONG_LIST_TYPE', 'movie/popular'),
+    ('/?WRONG_PARAM=WRONG_LIST_TYPE', 'movie/popular'),
     ('/?list_type=top_rated', 'movie/top_rated'),
     ('/?list_type=upcoming', 'movie/upcoming'),
     ('/?list_type=now_playing', 'movie/now_playing'),
