@@ -1,6 +1,7 @@
 import requests
 import random
-from PERSONAL_API_KEY import PERSONAL_API_KEY
+import os
+PERSONAL_API_KEY = os.environ.get("TMDB_API_TOKEN", "")
     
 def call_tmdb_api(endpoint):
     full_url = f"https://api.themoviedb.org/3/{endpoint}"
