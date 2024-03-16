@@ -8,12 +8,5 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-@app.shell_context_processor
-def make_shell_context():
-    return {
-        "db": db,
-        "Favorite": Favorite,
-    }
-
-from app.routes import *
 from app.models import Favorite
+from app.routes import *
