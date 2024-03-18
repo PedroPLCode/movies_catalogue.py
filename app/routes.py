@@ -1,11 +1,9 @@
-from flask import Flask, render_template, url_for, request, redirect, flash
+from flask import render_template, url_for, request, redirect, flash
 import random
 import datetime
 from app import tmdb_client
 from app import app, db
 from app.models import Favorite
-
-app = Flask(__name__)
 
 app.secret_key = b'my-secret'
 LIST_TYPES = ['top_rated', 'upcoming', 'popular', 'now_playing']
@@ -15,7 +13,14 @@ def homepage():
     selected_list = request.args.get('list_type', 'popular')
     if selected_list not in LIST_TYPES:
         selected_list = "popular"
+        
     movies = tmdb_client.prepare_movies_list(how_many=8, list_type=selected_list)
+    favorites = Favorite.query.all()
+    for movie in movies:
+        for favorite in favorites:
+            if movie['id'] == favorite.movie_id:
+                movie['is_favorite'] = True
+    
     return render_template("homepage.html",
                            movies=movies,
                            current_list=selected_list,
@@ -53,8 +58,8 @@ def today():
 def favorites():
     favorites = Favorite.query.all()
     movies = []
-    for single_favorite_movie_id in favorites:
-        movies.append(tmdb_client.get_single_movie_details(single_favorite_movie_id))
+    for favorite in favorites:
+        movies.append(tmdb_client.get_single_movie_details(favorite.movie_id))
     return render_template("favorites.html",
                             movies=movies,
                             )
@@ -79,10 +84,15 @@ def add_to_favorites():
     movie_id = data.get('movie_id')
     movie_title = data.get('movie_title')
     if movie_id and movie_title:
-        new_favorite = Favorite(movie_id=movie_id)
+        favorites = Favorite.query.all()
+        for favorite in favorites:
+            if favorite.movie_id == int(movie_id):
+                flash(f'"{movie_title}" already in Favorites!')
+                return redirect(url_for('homepage'))
+        new_favorite = Favorite(movie_id=movie_id, movie_title=movie_title)
         db.session.add(new_favorite)
         db.session.commit()
-        flash(f'Dodano film {movie_title} do ulubionych!')
+        flash(f'"{movie_title}" saved in Favorites!')
     return redirect(url_for('homepage'))
 
 
@@ -97,7 +107,7 @@ def delete_from_favorites():
             if favorite.movie_id  == int(movie_id):
                 db.session.delete(favorite)
                 db.session.commit()
-        flash(f'Usunięto film {movie_title} z ulubionych!')
+        flash(f'"{movie_title}" removed from Favorites!')
         favorites = Favorite.query.all()
     return redirect(url_for('favorites' if favorites else 'homepage'))
 

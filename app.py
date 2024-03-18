@@ -1,12 +1,7 @@
-from flask import Flask
-from config import Config
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
+from app import app, db
+from app.models import Favorite
 
-app = Flask(__name__, static_folder='templates')
-app.config.from_object(Config)
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+app.config["SECRET_KEY"] = "sratatata"
 
 @app.shell_context_processor
 def make_shell_context():
@@ -14,6 +9,6 @@ def make_shell_context():
         "db": db,
         "Favorite": Favorite,
     }
-
-from app.routes import *
-from app.models import Favorite
+    
+if __name__ == "__main__":
+    app.run(debug=True)
