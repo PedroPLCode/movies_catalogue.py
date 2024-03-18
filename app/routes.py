@@ -8,6 +8,11 @@ from app.models import Favorite
 app.secret_key = b'my-secret'
 LIST_TYPES = ['top_rated', 'upcoming', 'popular', 'now_playing']
 
+@app.errorhandler(404)
+def handle_page_not_found(error):
+    return redirect(url_for("homepage"))
+
+
 @app.route('/')
 def homepage():
     selected_list = request.args.get('list_type', 'popular')
