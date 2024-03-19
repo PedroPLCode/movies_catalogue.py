@@ -1,0 +1,16 @@
+svg {
+  transition: .5s all;
+}
+
+.is_favorite {
+  fill: red;
+}
+
+.not_favorite {
+  fill: green;
+}
+
+.not_favorite:hover {
+    fill: red;
+    transform: scale(1.2)
+  }

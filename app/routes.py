@@ -4,9 +4,11 @@ import datetime
 from app import tmdb_client
 from app import app, db
 from app.models import Favorite
+from app.utils import *
 
 app.secret_key = b'my-secret'
 LIST_TYPES = ['top_rated', 'upcoming', 'popular', 'now_playing']
+prev_path = ''
 
 @app.errorhandler(404)
 def handle_page_not_found(error):
@@ -15,16 +17,15 @@ def handle_page_not_found(error):
 
 @app.route('/')
 def homepage():
+    global prev_path
+    prev_path = request.path
+    
     selected_list = request.args.get('list_type', 'popular')
     if selected_list not in LIST_TYPES:
         selected_list = "popular"
         
     movies = tmdb_client.prepare_movies_list(how_many=8, list_type=selected_list)
-    favorites = Favorite.query.all()
-    for movie in movies:
-        for favorite in favorites:
-            if movie['id'] == favorite.movie_id:
-                movie['is_favorite'] = True
+    movies = check_if_movies_are_in_favorites(movies)
     
     return render_template("homepage.html",
                            movies=movies,
@@ -35,11 +36,16 @@ def homepage():
 
 @app.route('/search')
 def search():
+    global prev_path
+    prev_path = request.full_path
+    
     search_query = request.args.get("q", "")
     if search_query:
         movies = tmdb_client.get_movies_by_search_query(search_query)
     else: 
         movies = []
+    movies = check_if_movies_are_in_favorites(movies)
+    
     return render_template("search.html",
                            movies=movies,
                            search_query=search_query
@@ -48,10 +54,15 @@ def search():
     
 @app.route('/today')
 def today():
+    global prev_path
+    prev_path = request.full_path
+    
     today = datetime.date.today()
     timezone = request.args.get("timezone", "")
     timezone = timezone if timezone else 'pl'
     movies = tmdb_client.get_movies_airing_today_by_timezone(timezone)
+    movies = check_if_movies_are_in_favorites(movies)
+        
     return render_template("today.html",
                            movies=movies,
                            timezone=timezone,
@@ -61,6 +72,9 @@ def today():
 
 @app.route('/favorites')
 def favorites():
+    global prev_path
+    prev_path = request.full_path
+    
     favorites = Favorite.query.all()
     movies = []
     for favorite in favorites:
@@ -72,12 +86,19 @@ def favorites():
     
 @app.route("/movie/<movie_id>")
 def movie_details(movie_id):
+    global prev_path
+    prev_path = request.full_path
+    
     details = tmdb_client.get_single_movie_details(movie_id)
     cast = tmdb_client.get_single_movie_cast(movie_id)
     movie_images = tmdb_client.get_single_movie_images(movie_id)
     random_image = random.choice(movie_images['backdrops'])
+
+    favorites = Favorite.query.all()    
+    movie = check_and_mark_if_single_movie_is_in_favorites(details, favorites)
+    
     return render_template("movie_details.html",
-                           movie=details,
+                           movie=movie,
                            cast=cast,
                            image=random_image
                            )
@@ -85,6 +106,8 @@ def movie_details(movie_id):
 
 @app.route("/favorites/add", methods=['POST'])
 def add_to_favorites():
+    global prev_path
+        
     data = request.form
     movie_id = data.get('movie_id')
     movie_title = data.get('movie_title')
@@ -98,11 +121,16 @@ def add_to_favorites():
         db.session.add(new_favorite)
         db.session.commit()
         flash(f'"{movie_title}" saved in Favorites!')
-    return redirect(url_for('homepage'))
+        
+        print(prev_path)
+        
+    return redirect(prev_path)
 
 
 @app.route("/favorites/delete", methods=['POST'])
 def delete_from_favorites():
+    global prev_path
+            
     data = request.form
     movie_id = data.get('movie_id')
     movie_title = data.get('movie_title')
@@ -114,7 +142,9 @@ def delete_from_favorites():
                 db.session.commit()
         flash(f'"{movie_title}" removed from Favorites!')
         favorites = Favorite.query.all()
-    return redirect(url_for('favorites' if favorites else 'homepage'))
+        
+        print(prev_path)
+    return redirect(prev_path if favorites else 'homepage')
 
 
 @app.context_processor
