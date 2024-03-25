@@ -42,6 +42,7 @@ def search():
     
     return render_template("search.html",
                            movies=movies,
+                           movies_counter=len(movies),
                            search_query=search_query
                            )
     
@@ -124,6 +125,14 @@ def utility_processor():
     def tmdb_movie_title(movie):
         return tmdb_client.get_single_movie_title(movie)
     return {"tmdb_movie_title": tmdb_movie_title}
+
+
+@app.context_processor
+def utility_processor():
+    def favorites_counter():
+        favorites = Favorite.query.all()
+        return len(favorites)
+    return {"favorites_counter": favorites_counter}
 
 
 if __name__ == '__main__':

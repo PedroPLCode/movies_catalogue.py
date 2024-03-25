@@ -5,7 +5,14 @@
 <div class="row">
     <div class="col-lg-12 text-center">
         <h1 class="mt-5">Welcome in my Movies database</h1>
-        <p class="lead">Yours saved Favorites</p>
+        <p class="lead">Your favorites movies. {% if favorites_counter() == 0 %} 
+                                               No saved items.
+                                               {% elif favorites_counter() == 1 %}
+                                               {{ favorites_counter() }} saved item.
+                                               {% else %}
+                                               {{ favorites_counter() }} saved items.
+                                               {% endif %}
+        </p>
     </div>
     <div class="col-lg-12 mb-4 d-flex flex-row justify-content-center align-items-center">
         {% for type in list_types %}
@@ -40,7 +47,9 @@
     </div>
     {% endfor %}
     {% else %}
-    <h3>No saved favorites</h3>
+    <div class="col-lg-12 text-center">
+        <h3>No saved favorites</h3>
+    </div>
     {% endif %}
 </div>
 

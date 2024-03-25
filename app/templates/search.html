@@ -6,6 +6,13 @@
     <div class="col-lg-12 text-center">
        <h1 class="mt-5">Welcome in my Movies database</h1>
        <p class="lead">Search results for query: <strong>{{ search_query }}</strong></p>
+       <p>{% if movies_counter == 0 %}Nothing was found.
+          {% elif movies_counter == 1 %}
+          {{ movies_counter }} item found.
+          {% else %}
+          {{ movies_counter }} items found.
+          {% endif %}
+       </p>
     </div>
     {% if movies %}
         {% for movie in movies %}
@@ -31,7 +38,9 @@
         </div>
         {% endfor %}
     {% else %}
+    <div class="col-lg-12 text-center">
         <h3>Nothing was found.</h3>
+    </div>
     {% endif %}
 </div>
 
