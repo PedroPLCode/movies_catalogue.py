@@ -8,7 +8,6 @@ from app.utils import *
 
 app.secret_key = b'my-secret'
 LIST_TYPES = ['top_rated', 'upcoming', 'popular', 'now_playing']
-prev_path = ''
 
 @app.errorhandler(404)
 def handle_page_not_found(error):
@@ -17,9 +16,6 @@ def handle_page_not_found(error):
 
 @app.route('/')
 def homepage():
-    global prev_path
-    prev_path = request.path
-    
     selected_list = request.args.get('list_type', 'popular')
     if selected_list not in LIST_TYPES:
         selected_list = "popular"
@@ -36,10 +32,8 @@ def homepage():
 
 @app.route('/search')
 def search():
-    global prev_path
-    prev_path = request.full_path
-    
     search_query = request.args.get("q", "")
+        
     if search_query:
         movies = tmdb_client.get_movies_by_search_query(search_query)
     else: 
@@ -51,30 +45,9 @@ def search():
                            search_query=search_query
                            )
     
-    
-@app.route('/today')
-def today():
-    global prev_path
-    prev_path = request.full_path
-    
-    today = datetime.date.today()
-    timezone = request.args.get("timezone", "")
-    timezone = timezone if timezone else 'pl'
-    movies = tmdb_client.get_movies_airing_today_by_timezone(timezone)
-    movies = check_if_movies_are_in_favorites(movies)
-        
-    return render_template("today.html",
-                           movies=movies,
-                           timezone=timezone,
-                           today=today
-                           )
-    
 
 @app.route('/favorites')
 def favorites():
-    global prev_path
-    prev_path = request.full_path
-    
     favorites = Favorite.query.all()
     movies = []
     for favorite in favorites:
@@ -86,13 +59,10 @@ def favorites():
     
 @app.route("/movie/<movie_id>")
 def movie_details(movie_id):
-    global prev_path
-    prev_path = request.full_path
-    
     details = tmdb_client.get_single_movie_details(movie_id)
     cast = tmdb_client.get_single_movie_cast(movie_id)
     movie_images = tmdb_client.get_single_movie_images(movie_id)
-    random_image = random.choice(movie_images['backdrops'])
+    random_image = random.choice(movie_images['backdrops']) if movie_images['backdrops'] else None
 
     favorites = Favorite.query.all()    
     movie = check_and_mark_if_single_movie_is_in_favorites(details, favorites)
@@ -106,8 +76,7 @@ def movie_details(movie_id):
 
 @app.route("/favorites/add", methods=['POST'])
 def add_to_favorites():
-    global prev_path
-        
+    referer = request.headers.get('Referer')
     data = request.form
     movie_id = data.get('movie_id')
     movie_title = data.get('movie_title')
@@ -116,21 +85,19 @@ def add_to_favorites():
         for favorite in favorites:
             if favorite.movie_id == int(movie_id):
                 flash(f'"{movie_title}" already in Favorites!')
-                return redirect(url_for('homepage'))
+                return redirect(referer if referer else url_for('homepage'))
+                
         new_favorite = Favorite(movie_id=movie_id, movie_title=movie_title)
         db.session.add(new_favorite)
         db.session.commit()
         flash(f'"{movie_title}" saved in Favorites!')
         
-        print(prev_path)
-        
-    return redirect(prev_path)
+    return redirect(referer if referer else url_for('homepage'))
 
 
 @app.route("/favorites/delete", methods=['POST'])
 def delete_from_favorites():
-    global prev_path
-            
+    referer = request.headers.get('Referer')            
     data = request.form
     movie_id = data.get('movie_id')
     movie_title = data.get('movie_title')
@@ -141,10 +108,8 @@ def delete_from_favorites():
                 db.session.delete(favorite)
                 db.session.commit()
         flash(f'"{movie_title}" removed from Favorites!')
-        favorites = Favorite.query.all()
-        
-        print(prev_path)
-    return redirect(prev_path if favorites else 'homepage')
+  
+    return redirect(referer if referer else url_for('favorites'))
 
 
 @app.context_processor
